@@ -6,13 +6,12 @@ on:
   pull_request:
     branches: [ main, develop ]
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
   lint:
     name: PHP Lint
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     
     steps:
       - name: Checkout code
@@ -36,6 +35,8 @@ jobs:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     permissions:
       contents: write
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     
     steps:
       - name: Checkout code
@@ -43,17 +44,28 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Fetch all tags
+        run: git fetch --tags --force
+
       - name: Get version from plugin file
         id: get_version
         run: |
-          VERSION=$(grep -i "Version:" content-extractor.php | head -1 | awk '{print $2}' | tr -d '\r\n')
+          VERSION=$(grep -i "^\s*\*\s*Version:" content-extractor.php | head -1 | sed 's/.*Version:\s*\([0-9.]*\).*/\1/' | tr -d '\r\n ')
+          if [ -z "$VERSION" ]; then
+            VERSION=$(grep -i "Version:" content-extractor.php | head -1 | awk '{print $2}' | tr -d '\r\n ')
+          fi
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Plugin version: $VERSION"
+          if [ -z "$VERSION" ]; then
+            echo "Error: Could not extract version from plugin file"
+            exit 1
+          fi
 
       - name: Check if tag exists
         id: check_tag
         run: |
           TAG="v${{ steps.get_version.outputs.version }}"
+          echo "Checking for tag: $TAG"
           if git rev-parse "$TAG" >/dev/null 2>&1; then
             echo "exists=true" >> $GITHUB_OUTPUT
             echo "Tag $TAG already exists, skipping release creation"
@@ -63,8 +75,8 @@ jobs:
           fi
 
       - name: Create Release
-        uses: softprops/action-gh-release@v2
         if: steps.get_version.outputs.version != '' && steps.check_tag.outputs.exists == 'false'
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.get_version.outputs.version }}
           name: Release v${{ steps.get_version.outputs.version }}
@@ -85,3 +97,4 @@ jobs:
           draft: false
           prerelease: false
           generate_release_notes: true
+          fail_on_unmatched: false
