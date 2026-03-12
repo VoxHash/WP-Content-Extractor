@@ -45,38 +45,45 @@ jobs:
           fetch-depth: 0
 
       - name: Fetch all tags
-        run: git fetch --tags --force
+        run: |
+          git fetch --tags --force
+          git tag -l
 
       - name: Get version from plugin file
         id: get_version
         run: |
+          # Try multiple patterns to extract version
           VERSION=$(grep -i "^\s*\*\s*Version:" content-extractor.php | head -1 | sed 's/.*Version:\s*\([0-9.]*\).*/\1/' | tr -d '\r\n ')
           if [ -z "$VERSION" ]; then
-            VERSION=$(grep -i "Version:" content-extractor.php | head -1 | awk '{print $2}' | tr -d '\r\n ')
+            VERSION=$(grep -i "Version:" content-extractor.php | head -1 | awk -F'Version:' '{print $2}' | awk '{print $1}' | tr -d '\r\n ')
           fi
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "Plugin version: $VERSION"
           if [ -z "$VERSION" ]; then
             echo "Error: Could not extract version from plugin file"
             exit 1
           fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Plugin version: $VERSION"
 
       - name: Check if tag exists
         id: check_tag
         run: |
           TAG="v${{ steps.get_version.outputs.version }}"
           echo "Checking for tag: $TAG"
-          if git rev-parse "$TAG" >/dev/null 2>&1; then
+          # Check both local and remote tags
+          if git rev-parse "$TAG" >/dev/null 2>&1 || git ls-remote --tags origin "$TAG" | grep -q "$TAG"; then
             echo "exists=true" >> $GITHUB_OUTPUT
             echo "Tag $TAG already exists, skipping release creation"
+            exit 0
           else
             echo "exists=false" >> $GITHUB_OUTPUT
             echo "Tag $TAG does not exist, will create release"
+            exit 0
           fi
 
       - name: Create Release
         if: steps.get_version.outputs.version != '' && steps.check_tag.outputs.exists == 'false'
         uses: softprops/action-gh-release@v2
+        continue-on-error: true
         with:
           tag_name: v${{ steps.get_version.outputs.version }}
           name: Release v${{ steps.get_version.outputs.version }}
