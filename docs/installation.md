@@ -4,14 +4,14 @@
 
 1. **Download the Plugin**
    ```bash
-   git clone https://github.com/VoxHash/WPContent-extractor.git
-   cd WPContent-extractor
+   git clone https://github.com/VoxHash/WP-Content-Extractor.git
+   cd WP-Content-Extractor
    ```
 
 2. **Upload to WordPress**
    - Connect to your server via FTP/SFTP
    - Navigate to `wp-content/plugins/`
-   - Upload the entire `WPContent-extractor` folder
+   - Upload the entire `WP-Content-Extractor` folder (or rename to `wp-content-extractor`)
    - Ensure folder structure: `wp-content/plugins/wp-content-extractor/content-extractor.php`
 
 3. **Activate**
@@ -35,7 +35,7 @@
 ## Method 3: WP-CLI
 
 ```bash
-wp plugin install https://github.com/VoxHash/WPContent-extractor/archive/main.zip --activate
+wp plugin install https://github.com/VoxHash/WP-Content-Extractor/archive/main.zip --activate
 ```
 
 ## Verification

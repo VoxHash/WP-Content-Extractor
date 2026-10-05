@@ -1,71 +1,53 @@
-# Example 01 — Basic Setup
+# Example 01 — JSON API Source
 
-Step-by-step guide to set up WP Content Extractor for the first time.
+Publish posts from a JSON API using the built-in parser (no custom code required).
 
 ## Scenario
 
-You have a content API at `https://api.example.com/posts` that returns JSON data, and you want to automatically publish these posts to your WordPress site.
+Your source returns JSON like this:
 
-## Step 1: Install the Plugin
-
-1. Download the plugin
-2. Upload to `wp-content/plugins/wp-content-extractor/`
-3. Activate via WordPress admin
-
-## Step 2: Configure Source URL
-
-1. Go to **Settings → Content Extractor**
-2. Enter your source URL: `https://api.example.com/posts`
-3. Click **Save Changes**
-
-## Step 3: Implement Content Parsing
-
-Edit `functions.php` and implement `ce_parse_and_publish_content()`:
-
-```php
-function ce_parse_and_publish_content( $body ) {
-    $data = json_decode( $body, true );
-    $created_posts = array();
-    
-    if ( ! empty( $data['posts'] ) ) {
-        foreach ( $data['posts'] as $post_data ) {
-            $new_post = array(
-                'post_title'   => wp_strip_all_tags( $post_data['title'] ),
-                'post_content' => $post_data['content'],
-                'post_status'  => 'publish',
-                'post_author'  => 1,
-            );
-            
-            $post_id = wp_insert_post( $new_post );
-            
-            if ( $post_id && ! empty( $post_data['image'] ) ) {
-                ce_set_featured_image( $post_id, $post_data['image'] );
-            }
-            
-            if ( $post_id ) {
-                $created_posts[] = $post_id;
-            }
-        }
+```json
+{
+  "posts": [
+    {
+      "title": "Hello from the API",
+      "content": "<p>Body HTML is allowed and sanitized.</p>",
+      "date": "2026-10-05T12:00:00Z",
+      "categories": ["News"],
+      "tags": ["api", "json"],
+      "image": "https://example.com/images/hello.jpg"
     }
-    
-    return $created_posts;
+  ]
 }
 ```
 
-## Step 4: Test
+Supported top-level shapes: a bare array of posts, or objects with `posts`, `data`, or `items`. WordPress REST (`title.rendered` / `content.rendered`) is also accepted.
 
-1. Wait for cron to run (or trigger manually)
-2. Check WordPress posts to verify content was published
-3. Verify featured images are attached
+## Steps
 
-## Step 5: Monitor
+1. Install and activate the plugin (see [Installation](../installation.md)).
+2. Open **Settings → Content Extractor**.
+3. Set **Source URL** to your JSON endpoint, for example:
+   - Custom API: `https://api.example.com/posts`
+   - Another WordPress site: `https://wordpress.org/news/wp-json/wp/v2/posts`
+4. Save changes.
+5. Wait for the 30-minute cron, or trigger manually:
 
-- Check WordPress debug log for any errors
-- Monitor cron execution via WP-CLI: `wp cron event list`
-- Verify posts are being created regularly
+```php
+if ( function_exists( 'ce_extract_content' ) ) {
+    ce_extract_content();
+}
+```
 
-## Troubleshooting
+## Verify
 
-- **No posts created**: Check API response format matches your parsing logic
-- **Images not downloading**: Verify image URLs are accessible
-- **Cron not running**: Check WordPress cron is enabled
+- New posts appear under **Posts** in wp-admin
+- Duplicates with the same title are skipped
+- Featured images attach when `image` (or resolved REST media) URLs are reachable
+- With `WP_DEBUG` enabled, failures are written to the PHP error log
+
+## Notes
+
+- The plugin requests `?page=N` on the configured URL for batch pagination
+- Default batch size is 5 posts per run
+- Extend behavior with filters such as `ce_post_data`, `ce_post_status`, and `ce_post_author` (see [API](../api.md))

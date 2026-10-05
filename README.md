@@ -1,7 +1,7 @@
 # WP Content Extractor
 
-[![License](https://img.shields.io/github/license/VoxHash/WPContent-extractor)](LICENSE)
-[![Release](https://img.shields.io/github/v/release/VoxHash/WPContent-extractor?sort=semver)](https://github.com/VoxHash/WPContent-extractor/releases)
+[![License](https://img.shields.io/github/license/VoxHash/WP-Content-Extractor)](LICENSE)
+[![Release](https://img.shields.io/github/v/release/VoxHash/WP-Content-Extractor?sort=semver)](https://github.com/VoxHash/WP-Content-Extractor/releases)
 [![Docs](https://img.shields.io/badge/docs-website-blue)](./docs/index.md)
 
 > WordPress plugin that automatically extracts content from external URLs and publishes posts via scheduled cron jobs. Perfect for content creators who need to aggregate and republish content from multiple sources.
@@ -32,8 +32,8 @@
 
 ```bash
 # 1) Download the plugin
-git clone https://github.com/VoxHash/WPContent-extractor.git
-cd WPContent-extractor
+git clone https://github.com/VoxHash/WP-Content-Extractor.git
+cd WP-Content-Extractor
 
 # 2) Copy to WordPress plugins directory
 cp -r . /path/to/wordpress/wp-content/plugins/wp-content-extractor

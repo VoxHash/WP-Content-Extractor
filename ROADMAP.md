@@ -1,33 +1,35 @@
 # Roadmap — WP Content Extractor
 
-## Q2 2026
+Current release: **1.1.0** (JSON / XML / RSS / HTML parsing, cron extraction, featured images, extensibility hooks).
 
-- **Content Parsing Implementation**: Complete the `ce_parse_and_publish_content()` function with real parsing logic
-- **Multiple Source URLs**: Support for extracting content from multiple URLs
-- **Content Filtering**: Add options to filter content by keywords, date ranges, or categories
-- **Custom Post Types**: Support for publishing to custom post types
-- **Taxonomy Mapping**: Map source categories/tags to WordPress taxonomies
+## Shipped
 
-## Q3 2026
+- Content parsing for JSON, XML/RSS, and HTML
+- Duplicate detection by post title
+- Featured image download and attachment
+- WordPress action/filter hooks for customization
+- WordPress REST API field shape (`title.rendered` / `content.rendered`)
+- Admin settings page for a single source URL
+- Fixed 30-minute cron schedule
 
-- **RSS/Feed Support**: Add support for RSS/Atom feeds as content sources
-- **Content Transformation**: Add hooks for content transformation before publishing
-- **Duplicate Detection**: Prevent duplicate posts by checking existing content
-- **Scheduling Options**: Allow users to configure custom cron intervals
-- **Batch Size Configuration**: Make posts per batch configurable via settings
+## Near term (1.2.x)
 
-## Q4 2026
+- **Multiple source URLs**: Extract from more than one feed/API
+- **Configurable batch size**: Expose posts-per-run in settings (currently hardcoded to 5)
+- **Configurable cron interval**: Let admins choose schedule beyond every 30 minutes
+- **Content filtering**: Keywords, date ranges, and category include/exclude
+- **Manual “Run now” button** on the settings screen (no theme/code required)
 
-- **API Integration**: Add REST API endpoints for manual triggering
-- **Webhook Support**: Support webhook-based content extraction
-- **Content Templates**: Allow custom post templates for extracted content
-- **Analytics**: Add basic analytics for extraction success/failure rates
-- **Multi-site Support**: Full WordPress Multisite compatibility
+## Next (1.3.x)
 
-## Future
+- **Custom post types**: Publish to CPT targets
+- **Taxonomy mapping**: Map source categories/tags to existing WordPress terms
+- **Content transformation hooks UI**: Documented recipes for common transforms
+- **REST endpoint** to trigger extraction manually with capability checks
 
-- **AI Content Enhancement**: Optional AI-powered content enhancement before publishing
-- **Image Optimization**: Automatic image optimization and compression
-- **Content Translation**: Multi-language support for extracted content
-- **Advanced Filtering**: Machine learning-based content relevance filtering
-- **Dashboard Widget**: WordPress dashboard widget showing extraction stats
+## Later
+
+- Webhook-triggered extraction
+- Extraction success/failure stats (dashboard widget)
+- Multisite-aware settings
+- Optional image optimization and translation workflows

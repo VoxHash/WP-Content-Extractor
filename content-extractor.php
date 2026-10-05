@@ -1,9 +1,9 @@
 <?php
 /**
  * Plugin Name: WP Content Extractor
- * Plugin URI: https://github.com/VoxHash/WPContent-extractor
+ * Plugin URI: https://github.com/VoxHash/WP-Content-Extractor
  * Description: Extracts content from a specified URL and publishes posts in WordPress. Perfect for content creators who need to aggregate and republish content from multiple sources.
- * Version: 1.0.0
+ * Version: 1.1.0
  * Author: VoxHash
  * Author URI: https://github.com/VoxHash
  * License: MIT

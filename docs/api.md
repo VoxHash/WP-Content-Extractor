@@ -4,7 +4,7 @@
 
 ### `ce_extract_content()`
 
-Main function that extracts content from the configured URL and publishes posts.
+Fetches the configured source URL (with `?page=N` pagination) and publishes parsed posts.
 
 **Returns:** `void`
 
@@ -13,18 +13,14 @@ Main function that extracts content from the configured URL and publishes posts.
 ce_extract_content();
 ```
 
-**Hooks:**
-- `ce_before_extraction` - Fires before extraction starts
-- `ce_after_extraction` - Fires after extraction completes
-
 ### `ce_parse_and_publish_content( $body )`
 
-Parses the response body and publishes posts to WordPress.
+Detects JSON, XML/RSS, or HTML and creates WordPress posts.
 
 **Parameters:**
-- `$body` (string) - The HTML/XML/JSON response body to parse
+- `$body` (string) — Response body to parse
 
-**Returns:** `array` - Array of created post IDs
+**Returns:** `array` — Created post IDs
 
 **Usage:**
 ```php
@@ -33,80 +29,50 @@ $body = wp_remote_retrieve_body( $response );
 $post_ids = ce_parse_and_publish_content( $body );
 ```
 
+### `ce_detect_content_type( $body )`
+
+**Returns:** `string` — `json`, `xml`, `rss`, `html`, or `unknown`
+
 ### `ce_set_featured_image( $post_id, $image_url )`
 
-Downloads and sets a featured image for a post.
+Downloads an image and sets it as the post thumbnail.
 
-**Parameters:**
-- `$post_id` (int) - WordPress post ID
-- `$image_url` (string) - URL of the image to download
-
-**Returns:** `bool` - `true` on success, `false` on failure
-
-**Usage:**
-```php
-$success = ce_set_featured_image( 123, 'https://example.com/image.jpg' );
-```
+**Returns:** `bool`
 
 ### `ce_log_error( $message )`
 
-Logs an error message if `WP_DEBUG` is enabled.
-
-**Parameters:**
-- `$message` (string) - Error message to log
-
-**Returns:** `void`
-
-**Usage:**
-```php
-ce_log_error( 'Failed to fetch content from ' . $url );
-```
+Writes to the PHP error log when `WP_DEBUG` is enabled.
 
 ## Hooks
 
 ### Actions
 
-#### `ce_before_extraction`
-
-Fires before content extraction begins.
-
-```php
-add_action( 'ce_before_extraction', function() {
-    // Your code here
-});
-```
-
-#### `ce_after_extraction`
-
-Fires after content extraction completes.
+| Hook | Arguments | When |
+|---|---|---|
+| `ce_before_parsing` | `$body` | Before parse begins |
+| `ce_after_parsing` | `$created_posts` | After parse completes |
+| `ce_before_post_create` | `$new_post`, `$post_data` | Before `wp_insert_post` |
+| `ce_after_post_create` | `$post_id`, `$post_data` | After successful insert |
+| `ce_featured_image_set` | `$post_id`, `$attach_id`, `$image_url` | After thumbnail is set |
 
 ```php
-add_action( 'ce_after_extraction', function( $post_ids ) {
-    // $post_ids is array of created post IDs
-});
+add_action( 'ce_after_post_create', function( $post_id, $post_data ) {
+    // e.g. notify, set meta, etc.
+}, 10, 2 );
 ```
 
 ### Filters
 
-#### `ce_source_url`
-
-Filter the source URL before fetching.
-
-```php
-add_filter( 'ce_source_url', function( $url ) {
-    // Modify URL
-    return $url;
-});
-```
-
-#### `ce_post_data`
-
-Filter post data before publishing.
+| Hook | Arguments | Purpose |
+|---|---|---|
+| `ce_post_data` | `$post_data` | Mutate parsed fields before create |
+| `ce_post_status` | `$status`, `$post_data` | Default `publish` |
+| `ce_post_author` | `$author_id`, `$post_data` | Default `1` |
+| `ce_featured_image_url` | `$image_url`, `$post_id` | Rewrite image URL before download |
 
 ```php
-add_filter( 'ce_post_data', function( $post_data, $source_data ) {
-    // Modify post data
-    return $post_data;
+add_filter( 'ce_post_status', function( $status, $post_data ) {
+    return 'draft';
 }, 10, 2 );
 ```
 
@@ -114,38 +80,12 @@ add_filter( 'ce_post_data', function( $post_data, $source_data ) {
 
 ### `ce_settings`
 
-Stores plugin settings.
-
-**Structure:**
 ```php
 array(
-    'ce_url' => 'https://example.com/api/posts'
+    'ce_url' => 'https://example.com/feed/'
 )
-```
-
-**Get:**
-```php
-$options = get_option( 'ce_settings' );
-$url = $options['ce_url'] ?? '';
-```
-
-**Update:**
-```php
-update_option( 'ce_settings', array(
-    'ce_url' => 'https://new-url.com'
-) );
 ```
 
 ### `ce_current_page`
 
-Stores the current page number for pagination.
-
-**Get:**
-```php
-$page = get_option( 'ce_current_page', 1 );
-```
-
-**Update:**
-```php
-update_option( 'ce_current_page', 2 );
-```
+Integer page cursor used for `?page=N` batching (deleted when a batch returns fewer than the batch size).

@@ -10,8 +10,8 @@ Please read and follow our [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
 
 ```bash
 # Clone
-git clone https://github.com/VoxHash/WPContent-extractor.git
-cd WPContent-extractor
+git clone https://github.com/VoxHash/WP-Content-Extractor.git
+cd WP-Content-Extractor
 
 # Set up WordPress development environment
 # Install WordPress locally or use a Docker setup

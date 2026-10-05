@@ -58,26 +58,31 @@ $posts_per_page = 10; // Process 10 posts per batch
 
 ### Content Parsing
 
-Implement custom parsing logic in `functions.php`:
+Parsing for JSON, XML/RSS, and HTML is built in. Prefer filters over replacing the parser:
 
 ```php
-function ce_parse_and_publish_content( $body ) {
-    // Your custom parsing logic here
-    // Return array of created post IDs
-}
+add_filter( 'ce_post_data', function( $post_data ) {
+    // Adjust title/content/image before publish
+    return $post_data;
+} );
 ```
+
+See [Examples](examples/) and [API](api.md).
 
 ## Hooks & Filters
 
 ### Actions
 
-- `ce_before_extraction`: Fires before content extraction
-- `ce_after_extraction`: Fires after content extraction
+- `ce_before_parsing` / `ce_after_parsing`
+- `ce_before_post_create` / `ce_after_post_create`
+- `ce_featured_image_set`
 
 ### Filters
 
-- `ce_source_url`: Filter the source URL before fetching
-- `ce_post_data`: Filter post data before publishing
+- `ce_post_data` — Filter post fields before publishing
+- `ce_post_status` — Control publish status
+- `ce_post_author` — Control author ID
+- `ce_featured_image_url` — Rewrite image URLs
 
 ## Examples
 

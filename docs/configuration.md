@@ -6,57 +6,52 @@ Access via **Settings → Content Extractor** in WordPress admin.
 
 | Setting | Type | Default | Description |
 |---|---|---|---|
-| Source URL | URL | - | The URL to extract content from. Must be a valid HTTP/HTTPS URL. |
+| Source URL | URL | _(empty)_ | HTTP(S) URL to fetch. Cron appends `?page=N` for batching. |
 
-## Plugin Constants
+Settings are stored in the `ce_settings` option (`ce_url` key) and sanitized with `esc_url_raw()`.
 
-You can define these constants in `wp-config.php`:
+## Built-in defaults (code)
 
-| Constant | Type | Default | Description |
-|---|---|---|---|
-| `CE_DEBUG` | boolean | false | Enable debug logging |
-| `CE_POSTS_PER_BATCH` | integer | 5 | Number of posts to process per batch |
-| `CE_CRON_INTERVAL` | string | 'every_30_minutes' | Cron interval name |
+These are not admin fields yet (see [ROADMAP.md](../ROADMAP.md)); change them in `content-extractor.php` if needed:
 
-Example:
+| Behavior | Current value | Location |
+|---|---|---|
+| Posts per batch | `5` | `$posts_per_page` in `ce_extract_content()` |
+| Cron interval | Every 30 minutes (`1800` seconds) | `ce_add_custom_cron_intervals()` |
+| Cron hook | `ce_daily_event` → `ce_extract_content` | `content-extractor.php` |
 
-```php
-// In wp-config.php
-define('CE_DEBUG', true);
-define('CE_POSTS_PER_BATCH', 10);
-```
+## Cron
 
-## Cron Configuration
+Default: **every 30 minutes**.
 
-Default cron interval: **Every 30 minutes**
+To use a different interval:
 
-To change:
+1. Add a schedule in `ce_add_custom_cron_intervals()`
+2. Reschedule with `wp_schedule_event()` (clear the old event on deactivation/reactivation)
+3. Confirm with `wp cron event list`
 
-1. Edit `content-extractor.php`
-2. Modify `ce_add_custom_cron_intervals()` function
-3. Update the schedule in `wp_schedule_event()`
+## Content formats
 
-## Content Parsing
+No custom parser is required. The plugin detects and handles:
 
-The `ce_parse_and_publish_content()` function needs to be implemented based on your content source format.
+- **JSON** — array or `{ posts|data|items: [...] }`, plus WordPress REST nested `rendered` fields
+- **XML / RSS / Atom** — `item` / `entry` nodes
+- **HTML** — `article` and common `.post` / `.entry` containers
 
-Current implementation returns an empty array. You'll need to:
+Customize via filters in [API](api.md) rather than replacing the parser.
 
-1. Parse the response body (HTML, XML, JSON, etc.)
-2. Extract post data (title, content, categories, tags)
-3. Create WordPress posts using `wp_insert_post()`
-4. Return array of created post IDs
+## Featured images
 
-## Featured Images
+When parsed data includes an `image` URL (or RSS enclosure), `ce_set_featured_image()` downloads it with `wp_remote_get()`, stores it in the media library, and sets the thumbnail. Relative URLs are resolved against the configured source host when possible.
 
-The plugin includes `ce_set_featured_image()` function for setting featured images:
+## Debug logging
+
+Enable WordPress debug logging:
 
 ```php
-ce_set_featured_image( $post_id, $image_url );
+// wp-config.php
+define( 'WP_DEBUG', true );
+define( 'WP_DEBUG_LOG', true );
 ```
 
-This function:
-- Downloads the image from the URL
-- Uploads it to WordPress media library
-- Sets it as the post's featured image
-- Returns `true` on success, `false` on failure
+Plugin errors are written with `ce_log_error()` only when `WP_DEBUG` is true.

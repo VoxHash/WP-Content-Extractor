@@ -28,10 +28,10 @@
 
 **Solutions:**
 - Check source URL is correct and accessible
-- Verify content parsing function is implemented
-- Check WordPress debug log for errors
-- Test parsing function manually with sample data
-- Verify API returns expected format
+- Confirm the response is JSON, RSS/XML, or HTML the parser understands (see [Examples](examples/))
+- Check WordPress debug log for errors (`WP_DEBUG` / `WP_DEBUG_LOG`)
+- Trigger manually: `wp eval 'ce_extract_content();'`
+- Remember duplicate titles are skipped
 
 ### Featured Images Not Downloading
 

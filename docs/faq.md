@@ -41,7 +41,7 @@ Yes, call `ce_extract_content()` function or use WP-CLI.
 
 ### What content formats are supported?
 
-The plugin can work with any format, but you need to implement the parsing logic in `ce_parse_and_publish_content()`. Examples are provided for JSON and HTML.
+JSON (including WordPress REST `title.rendered` / `content.rendered`), XML/RSS/Atom feeds, and common HTML article listings. Content type is detected automatically.
 
 ## Configuration
 
@@ -62,9 +62,10 @@ Edit `$posts_per_page` in `ce_extract_content()` function.
 ### Why aren't posts being created?
 
 - Check source URL is correct
-- Verify parsing function is implemented
+- Confirm response format (JSON / RSS / HTML)
 - Check WordPress debug log
-- Test with sample data
+- Test with `wp eval 'ce_extract_content();'`
+- Remember duplicate titles are skipped
 
 ### Why aren't images downloading?
 

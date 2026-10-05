@@ -11,7 +11,7 @@
 
 1. **Download the Plugin**
    ```bash
-   git clone https://github.com/VoxHash/WPContent-extractor.git
+   git clone https://github.com/VoxHash/WP-Content-Extractor.git
    ```
 
 2. **Install to WordPress**

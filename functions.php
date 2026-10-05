@@ -7,7 +7,7 @@
  * @return array Array of created post IDs
  */
 function ce_parse_and_publish_content( $body ) {
-    if ( empty( $body ) ) {
+    if ( empty( $body ) || trim( $body ) === '' ) {
         ce_log_error( 'Content Extractor: Empty body received' );
         return array();
     }
@@ -52,6 +52,10 @@ function ce_parse_and_publish_content( $body ) {
  */
 function ce_detect_content_type( $body ) {
     $body_trimmed = trim( $body );
+
+    if ( $body_trimmed === '' ) {
+        return 'unknown';
+    }
     
     // Check for JSON
     if ( ( $body_trimmed[0] === '{' || $body_trimmed[0] === '[' ) && json_decode( $body_trimmed ) !== null ) {
@@ -207,9 +211,9 @@ function ce_parse_xml_content( $body ) {
             $post_data['categories'] = $categories;
         }
         
-        // Extract image/enclosure
-        $image_nodes = $xpath->query( './/enclosure[@type="image"] | .//media:content | .//image', $item );
-        if ( $image_nodes->length > 0 ) {
+        // Extract image/enclosure (use local-name for media RSS to avoid undefined namespace prefix)
+        $image_nodes = $xpath->query( './/enclosure[@type="image"] | .//*[local-name()="content"][@url] | .//image', $item );
+        if ( $image_nodes && $image_nodes->length > 0 ) {
             $image_url = $image_nodes->item(0)->getAttribute( 'url' );
             if ( empty( $image_url ) ) {
                 $image_url = $image_nodes->item(0)->getAttribute( 'href' );
@@ -318,17 +322,28 @@ function ce_create_post_from_data( $post_data ) {
     // Filter post data before processing
     $post_data = apply_filters( 'ce_post_data', $post_data );
     
+    // Normalize WP REST-style nested fields (title.rendered / content.rendered)
+    if ( isset( $post_data['title'] ) && is_array( $post_data['title'] ) ) {
+        $post_data['title'] = $post_data['title']['rendered'] ?? $post_data['title']['content'] ?? reset( $post_data['title'] );
+    }
+    if ( isset( $post_data['content'] ) && is_array( $post_data['content'] ) ) {
+        $post_data['content'] = $post_data['content']['rendered'] ?? $post_data['content']['content'] ?? reset( $post_data['content'] );
+    }
+    if ( isset( $post_data['excerpt'] ) && is_array( $post_data['excerpt'] ) ) {
+        $post_data['excerpt'] = $post_data['excerpt']['rendered'] ?? $post_data['excerpt']['content'] ?? reset( $post_data['excerpt'] );
+    }
+
     // Extract and sanitize title
     $title = '';
-    if ( isset( $post_data['title'] ) ) {
-        $title = wp_strip_all_tags( $post_data['title'] );
+    if ( isset( $post_data['title'] ) && is_scalar( $post_data['title'] ) ) {
+        $title = wp_strip_all_tags( (string) $post_data['title'] );
         $title = sanitize_text_field( $title );
     }
     
     if ( empty( $title ) ) {
         // Generate title from content if missing
-        if ( ! empty( $post_data['content'] ) ) {
-            $content_stripped = wp_strip_all_tags( $post_data['content'] );
+        if ( ! empty( $post_data['content'] ) && is_scalar( $post_data['content'] ) ) {
+            $content_stripped = wp_strip_all_tags( (string) $post_data['content'] );
             $title = wp_trim_words( $content_stripped, 8, '...' );
         } else {
             ce_log_error( 'Content Extractor: Post skipped - no title or content' );
@@ -345,8 +360,10 @@ function ce_create_post_from_data( $post_data ) {
     
     // Extract and sanitize content
     $content = '';
-    if ( isset( $post_data['content'] ) ) {
-        $content = wp_kses_post( $post_data['content'] );
+    if ( isset( $post_data['content'] ) && is_scalar( $post_data['content'] ) ) {
+        $content = wp_kses_post( (string) $post_data['content'] );
+    } elseif ( isset( $post_data['excerpt'] ) && is_scalar( $post_data['excerpt'] ) ) {
+        $content = wp_kses_post( (string) $post_data['excerpt'] );
     }
     
     if ( empty( $content ) && empty( $title ) ) {

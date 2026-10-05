@@ -7,48 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-10-05
+
 ### Added
-- **Content Parsing Implementation**: Complete implementation of `ce_parse_and_publish_content()` function
-  - Support for JSON format (multiple structure variations)
-  - Support for XML/RSS feeds
-  - Support for HTML content parsing
-  - Automatic content type detection
-  - Duplicate post detection
-  - Category and tag processing
-  - Featured image support with multiple formats
-- WordPress hooks and filters for extensibility:
-  - `ce_before_parsing` - Action before parsing starts
-  - `ce_after_parsing` - Action after parsing completes
-  - `ce_post_data` - Filter to modify post data before creation
-  - `ce_post_status` - Filter to set post status
-  - `ce_post_author` - Filter to set post author
-  - `ce_before_post_create` - Action before post creation
-  - `ce_after_post_create` - Action after post creation
-  - `ce_featured_image_url` - Filter to modify image URL
-  - `ce_featured_image_set` - Action after featured image is set
-- Comprehensive error logging throughout parsing process
-- Support for multiple JSON structures (posts, data, items arrays, or single objects)
-- Automatic category creation if categories don't exist
-- Enhanced featured image handling with proper file type detection
-- Comprehensive documentation structure
-- Development goals and roadmap
-- Contributing guidelines
-- Security policy
-- Code of conduct
+- Full content parsing for JSON, XML/RSS, and HTML sources (`ce_parse_and_publish_content()`)
+- Automatic content-type detection with JSON fallback
+- Duplicate post detection by title
+- Category creation/mapping and tag support
+- WordPress hooks and filters for extensibility (`ce_before_parsing`, `ce_after_parsing`, `ce_post_data`, `ce_post_status`, `ce_post_author`, `ce_before_post_create`, `ce_after_post_create`, `ce_featured_image_url`, `ce_featured_image_set`)
+- Native WordPress REST API JSON support (`title.rendered` / `content.rendered`)
+- Featured image handling for JPG, PNG, GIF, and WebP
 
 ### Changed
-- Improved error handling in `ce_set_featured_image()` function
-- Enhanced settings sanitization with custom callback
-- Better return value handling in `ce_parse_and_publish_content()`
-- Featured image function now handles multiple image formats (JPG, PNG, GIF, WebP)
-- Improved image URL processing with relative to absolute URL conversion
+- Improved settings sanitization via `ce_sanitize_settings()`
+- Stronger return-value handling from the parser
+- Relative featured-image URLs resolved against the configured source URL
+- Documentation kit aligned with the live GitHub repository (`VoxHash/WP-Content-Extractor`)
+- Roadmap updated to reflect shipped parsing and feed support
 
 ### Fixed
-- Fixed missing cron hook connection (`ce_daily_event` now properly connected to `ce_extract_content`)
-- Fixed undefined variable `$posts` in content extraction function
-- Fixed security issue: replaced `file_get_contents()` with `wp_remote_get()` for remote URLs
-- Fixed undefined variable `$upload_dir` in featured image function
-- Added proper error handling for file operations
+- Cron hook `ce_daily_event` correctly connected to `ce_extract_content`
+- Remote fetches use `wp_remote_get()` instead of `file_get_contents()`
+- Undefined `$posts` / `$upload_dir` issues in extraction and featured-image paths
+- Whitespace-only response bodies no longer trigger string-offset warnings
+- RSS `media:` namespace XPath no longer emits undefined-prefix warnings
+- Nested WP REST title/content arrays no longer crash sanitization
+- CI version extraction now reads the plugin header reliably (avoids bad `vVersion:` tags)
+
+### Removed
+- `DEVELOPMENT_GOALS.md` (folded into `ROADMAP.md` / documentation kit)
 
 ## [1.0.0] - 2026-03-12
 

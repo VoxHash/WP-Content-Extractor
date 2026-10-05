@@ -17,7 +17,7 @@
 ### Contact
 
 - **Email**: contact@voxhash.dev
-- **GitHub Issues**: [Open an issue](https://github.com/VoxHash/WPContent-extractor/issues)
+- **GitHub Issues**: [Open an issue](https://github.com/VoxHash/WP-Content-Extractor/issues)
 
 ## Before Asking for Help
 
