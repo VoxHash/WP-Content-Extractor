@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Relicensed from MIT to **GPLv2 or later** to align with WordPress core and WordPress.org plugin licensing norms (plugin headers, LICENSE, README, docs)
+
 ## [1.1.0] - 2026-10-05
 
 ### Added

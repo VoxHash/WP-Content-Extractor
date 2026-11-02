@@ -13,7 +13,7 @@ A WordPress plugin that automatically extracts content from external URLs and pu
 
 ### Is this plugin free?
 
-Yes, this plugin is open source and free to use under the MIT License.
+Yes, this plugin is open source and free to use under the GNU General Public License v2 or later (GPLv2+), matching WordPress core.
 
 ## Installation
 

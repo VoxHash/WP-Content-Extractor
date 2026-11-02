@@ -6,8 +6,8 @@
  * Version: 1.1.0
  * Author: VoxHash
  * Author URI: https://github.com/VoxHash
- * License: MIT
- * License URI: https://opensource.org/licenses/MIT
+ * License: GPLv2 or later
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: wp-content-extractor
  * Domain Path: /languages
  * Requires at least: 5.0
